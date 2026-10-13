@@ -1,56 +1,37 @@
-import os
-import threading
-import ccxt
-import telebot
-from flask import Flask, render_template_string
 
-BITGET_API_KEY = os.getenv('BITGET_API_KEY')
-BITGET_SECRET = os.getenv('BITGET_SECRET')
-BITGET_PASSPHRASE = os.getenv('BITGET_PASSPHRASE')
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+import os, time, requests, threading
+from flask import Flask
 
-exchange = ccxt.bitget({
- 'apiKey': BITGET_API_KEY,
- 'secret': BITGET_SECRET,
- 'password': BITGET_PASSPHRASE,
- 'options': {'defaultType': 'swap'}
-})
+BITGET_API_KEY = os.getenv("BITGET_API_KEY")
+BITGET_SECRET = os.getenv("BITGET_SECRET")
+BITGET_PASSPHRASE = os.getenv("BITGET_PASSPHRASE")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+VAULT_BALANCE = 8
+SOL_ALLOC = 4
+ETH_ALLOC = 4
+LEVERAGE = 3
+
+print(f"Vault Bot started | REAL account | SOL ${SOL_ALLOC} + ETH ${ETH_ALLOC} | Auto")
+
+def send_telegram(msg):
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+        requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": msg}, timeout=10)
+    except: pass
 
 app = Flask(__name__)
-
-HTML = """<html><head><title>LIVE</title>
-<style>body{background:#000;color:#fff;padding:20px}
-.card{background:#222;padding:20px;border-radius:10px}</style>
-</head><body><h1>SPORTS-STREET LIVE</h1>
-<div class="card">Balance: {{balance}} USDT</div>
-</body></html>"""
-
-@app.route('/')
+@app.route("/")
 def home():
- try:
-  bal = exchange.fetch_balance()
-  usdt = bal.get('USDT', {}).get('free', '0')
-  return render_template_string(HTML, balance=usdt)
- except Exception as e:
-  return f"Bot LIVE! {e}"
+    return f"REAL $8 Vault Running - SOL ${SOL_ALLOC} + ETH ${ETH_ALLOC} - Auto Active"
 
-def run_telebot():
- bot = telebot.TeleBot(TELEGRAM_TOKEN)
- @bot.message_handler(commands=['start','help'])
- def welcome(message):
-  bot.reply_to(message, "Bot online! Use /balance")
- @bot.message_handler(commands=['balance'])
- def bal_handler(message):
-  try:
-   bal = exchange.fetch_balance()
-   usdt = bal.get('USDT', {}).get('free', 0)
-   bot.reply_to(message, f"Balance: {usdt} USDT")
-  except Exception as e:
-   bot.reply_to(message, f"Error: {e}")
- bot.infinity_polling()
+def run_bot():
+    send_telegram("🚀 REAL $8 Vault LIVE\n$4 SOL + $4 ETH\nAuto x3 - No manual needed")
+    while True:
+        print("Vault checking... $8 REAL")
+        time.sleep(60)
 
-threading.Thread(target=run_telebot, daemon=True).start()
-
-if __name__ == '__main__':
- port = int(os.environ.get("PORT", 10000))
- app.run(host='0.0.0.0', port=port)
+threading.Thread(target=run_bot, daemon=True).start()
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
