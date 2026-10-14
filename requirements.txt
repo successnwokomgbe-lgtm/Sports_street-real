@@ -1,4 +1,3 @@
+pyTelegramBotAPI
 Flask
 ccxt
-pyTelegramBotAPI
-gunicorn
