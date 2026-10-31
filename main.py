@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Vault Bot LIVE - REAL 4 USDT"
+    return "Vault Bot LIVE - REAL & USDT"
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 API_KEY = os.getenv("BITGET_API_KEY")
@@ -19,25 +19,29 @@ def get_real_balance():
         ex = ccxt.bitget({
             'apiKey': API_KEY,
             'secret': SECRET,
-            'password': PASSPHRASE
+            'password': PASSPHRASE,
         })
         b = ex.fetch_balance()
         return b['USDT']['free']
     except Exception as e:
         return f"Error: {e}"
 
+async def start(update, context):
+    await update.message.reply_text("Bot is online. Send /balance to check balance.")
+
 async def balance(update, context):
     bal = get_real_balance()
-    await update.message.reply_text(f"💰 REAL Balance: {bal} USDT\nOn Bitget")
+    await update.message.reply_text(f"REAL Balance: {bal} USDT from Bitget")
 
 async def run(update, context):
-    await update.message.reply_text("🚀 Vault Bot Running...")
+    await update.message.reply_text("Vault Bot Running...")
 
 def start_bot():
     if not TOKEN:
         print("NO TELEGRAM_TOKEN")
         return
     tg_app = ApplicationBuilder().token(TOKEN).build()
+    tg_app.add_handler(CommandHandler("start", start))
     tg_app.add_handler(CommandHandler("balance", balance))
     tg_app.add_handler(CommandHandler("run", run))
     tg_app.run_polling()
